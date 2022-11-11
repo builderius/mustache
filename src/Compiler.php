@@ -118,13 +118,13 @@ class Compiler
     }
     const KLASS = '<?php
 
-        class %s extends \Mustache\Template
+        class %s extends \\Builderius\\Mustache\\Template
         {
             private $lambdaHelper;%s
 
-            public function renderInternal(Context $context, $indent = \'\')
+            public function renderInternal(\\Builderius\\Mustache\\Context $context, $indent = \'\')
             {
-                $this->lambdaHelper = new LambdaHelper($this->mustache, $context);
+                $this->lambdaHelper = new \\Builderius\\Mustache\\LambdaHelper($this->mustache, $context);
                 $buffer = \'\';
         %s
 
@@ -135,9 +135,9 @@ class Compiler
         }';
     const KLASS_NO_LAMBDAS = '<?php
 
-        class %s extends \Mustache\Template
+        class %s extends \\Builderius\\Mustache\\Template
         {%s
-            public function renderInternal(Context $context, $indent = \'\')
+            public function renderInternal(\\Builderius\\Mustache\\Context $context, $indent = \'\')
             {
                 $buffer = \'\';
         %s
