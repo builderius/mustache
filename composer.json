@@ -1,5 +1,5 @@
 {
-  "name": "mustache\/mustache",
+  "name": "builderius\/mustache",
   "description": "A Mustache implementation in PHP. (PSR-4)",
   "license": "MIT",
   "autoload": {
