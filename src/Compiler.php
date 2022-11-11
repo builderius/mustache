@@ -118,7 +118,7 @@ class Compiler
     }
     const KLASS = '<?php
 
-        class %s extends Template
+        class %s extends \Mustache\Template
         {
             private $lambdaHelper;%s
 
@@ -135,7 +135,7 @@ class Compiler
         }';
     const KLASS_NO_LAMBDAS = '<?php
 
-        class %s extends Template
+        class %s extends \Mustache\Template
         {%s
             public function renderInternal(Context $context, $indent = \'\')
             {
