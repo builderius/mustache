@@ -1,0 +1,13 @@
+{
+  "name": "mustache\/mustache",
+  "description": "A Mustache implementation in PHP. (PSR-4)",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Mustache": "src"
+    }
+  },
+  "require": {
+    "php": ">=5.2.4"
+  }
+}
