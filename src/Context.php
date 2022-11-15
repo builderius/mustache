@@ -2,6 +2,7 @@
 
 namespace Mustache;
 
+use Bundle\ExpressionLanguageBundle\ExpressionLanguage;
 use Mustache\Exception\InvalidArgumentException;
 
 /**
@@ -11,6 +12,12 @@ class Context
 {
     private $stack = array();
     private $blockStack = array();
+
+    /**
+     * @var ExpressionLanguage
+     */
+    private $expressionLanguage;
+
     /**
      * Mustache rendering Context constructor.
      *
@@ -22,6 +29,18 @@ class Context
             $this->stack = array($context);
         }
     }
+
+    /**
+     * @param ExpressionLanguage $expressionLanguage
+     * @return $this
+     */
+    public function setExpressionLanguage(ExpressionLanguage $expressionLanguage)
+    {
+        $this->expressionLanguage = $expressionLanguage;
+
+        return $this;
+    }
+
     /**
      * Push a new Context frame onto the stack.
      *
@@ -183,29 +202,11 @@ class Context
      */
     private function findVariableInStack($id, array $stack)
     {
-        for ($i = \count($stack) - 1; $i >= 0; $i--) {
-            $frame =& $stack[$i];
-            switch (\gettype($frame)) {
-                case 'object':
-                    if (!$frame instanceof \Closure) {
-                        if (\method_exists($frame, $id)) {
-                            return $frame->{$id}();
-                        }
-                        if (isset($frame->{$id})) {
-                            return $frame->{$id};
-                        }
-                        if ($frame instanceof \ArrayAccess && isset($frame[$id])) {
-                            return $frame[$id];
-                        }
-                    }
-                    break;
-                case 'array':
-                    if (\array_key_exists($id, $frame)) {
-                        return $frame[$id];
-                    }
-                    break;
-            }
+        $frame = $stack[1];
+        try {
+            return $this->expressionLanguage->evaluate($id, $frame);
+        } catch(\Exception $e) {
+            return '';
         }
-        return '';
     }
 }

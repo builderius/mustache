@@ -2,6 +2,7 @@
 
 namespace Mustache;
 
+use Bundle\ExpressionLanguageBundle\ExpressionLanguage;
 use Mustache\Cache\FilesystemCache;
 use Mustache\Cache\NoopCache;
 use Mustache\Exception\InvalidArgumentException;
@@ -10,6 +11,7 @@ use Mustache\Exception\UnknownTemplateException;
 use Mustache\Loader\ArrayLoader;
 use Mustache\Loader\MutableLoader;
 use Mustache\Loader\StringLoader;
+use Mustache\Template;
 
 /**
  * A Mustache implementation in PHP.
@@ -53,6 +55,9 @@ class Engine
     private $tokenizer;
     private $parser;
     private $compiler;
+
+    private $expressionLanguage;
+
     /**
      * Mustache class constructor.
      *
@@ -516,6 +521,23 @@ class Engine
         return $this->cache;
     }
     /**
+     * @return mixed
+     */
+    public function getExpressionLanguage()
+    {
+        return $this->expressionLanguage;
+    }
+    /**
+     * @param mixed $expressionLanguage
+     * @return $this
+     */
+    public function setExpressionLanguage($expressionLanguage)
+    {
+        $this->expressionLanguage = $expressionLanguage;
+
+        return $this;
+    }
+    /**
      * Get the current Lambda Cache instance.
      *
      * If 'cache_lambda_templates' is enabled, this is the default cache instance. Otherwise, it is a NoopCache.
@@ -546,22 +568,7 @@ class Engine
      */
     public function getTemplateClassName($source)
     {
-        // For the most part, adding a new option here should do the trick.
-        //
-        // Pick a value here which is unique for each possible way the template
-        // could be compiled... but not necessarily unique per option value. See
-        // escape below, which only needs to differentiate between 'custom' and
-        // 'default' escapes.
-        //
-        // Keep this list in alphabetical order :)
-        $chunks = array('charset' => $this->charset, 'delimiters' => $this->delimiters ? $this->delimiters : '{{ }}', 'entityFlags' => $this->entityFlags, 'escape' => isset($this->escape) ? 'custom' : 'default', 'key' => $source instanceof Source ? $source->getKey() : 'source', 'pragmas' => $this->getPragmas(), 'strictCallables' => $this->strictCallables, 'version' => self::VERSION);
-        $key = \json_encode($chunks);
-        // Template Source instances have already provided their own source key. For strings, just include the whole
-        // source string in the md5 hash.
-        if (!$source instanceof Source) {
-            $key .= "\n" . $source;
-        }
-        return $this->templateClassPrefix . \md5($key);
+        return $this->templateClassPrefix . \md5($source);
     }
     /**
      * Load a Mustache Template by name.
@@ -582,9 +589,9 @@ class Engine
      *
      * @param string $name
      *
-     * @return Template
+     * @return Template|false
      */
-    public function loadPartial($name)
+    public function loadPartial($name, $context)
     {
         try {
             if (isset($this->partialsLoader)) {
@@ -593,6 +600,14 @@ class Engine
                 $loader = $this->loader;
             } else {
                 throw new UnknownTemplateException($name);
+            }
+            try {
+                $name = $this->expressionLanguage->evaluate($name, $context);
+                if (!$name) {
+                    return false;
+                }
+            } catch(\Exception $e) {
+                return false;
             }
             return $this->loadSource($loader->load($name));
         } catch (UnknownTemplateException $e) {
@@ -647,7 +662,7 @@ class Engine
                 }
             }
             $this->log(Logger::DEBUG, 'Instantiating template: "{className}"', array('className' => $className));
-            $this->templates[$className] = new $className($this);
+            $this->templates[$className] = new $className($this, $this->expressionLanguage);
         }
         return $this->templates[$className];
     }

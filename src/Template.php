@@ -2,6 +2,8 @@
 
 namespace Mustache;
 
+use Bundle\ExpressionLanguageBundle\ExpressionLanguage;
+
 /**
  * Abstract Mustache Template class.
  *
@@ -13,6 +15,12 @@ abstract class Template
      * @var Engine
      */
     protected $mustache;
+
+    /**
+     * @var ExpressionLanguage
+     */
+    protected $expressionLanguage;
+
     /**
      * @var bool
      */
@@ -22,9 +30,10 @@ abstract class Template
      *
      * @param Engine $mustache
      */
-    public function __construct(Engine $mustache)
+    public function __construct(Engine $mustache, ExpressionLanguage $expressionLanguage)
     {
         $this->mustache = $mustache;
+        $this->expressionLanguage = $expressionLanguage;
     }
     /**
      * Mustache Template instances can be treated as a function and rendered by simply calling them.
@@ -125,6 +134,7 @@ abstract class Template
     protected function prepareContextStack($context = null)
     {
         $stack = new Context();
+        $stack->setExpressionLanguage($this->expressionLanguage);
         $helpers = $this->mustache->getHelpers();
         if (!$helpers->isEmpty()) {
             $stack->push($helpers);

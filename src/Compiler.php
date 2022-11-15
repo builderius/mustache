@@ -241,7 +241,7 @@ class Compiler
         $buffer .= $this->section%s($context, $indent, $value);
     ';
     const SECTION = '
-        private function section%s(Context $context, $indent, $value)
+        private function section%s(\\Builderius\\Mustache\\Context $context, $indent, $value)
         {
             $buffer = \'\';
 
@@ -327,7 +327,7 @@ class Compiler
     }
     const PARTIAL_INDENT = ', $indent . %s';
     const PARTIAL = '
-        if ($partial = $this->mustache->loadPartial(%s)) {
+        if ($partial = $this->mustache->loadPartial(%s, $value)) {
             $buffer .= $partial->renderInternal($context%s);
         }
     ';
@@ -350,7 +350,7 @@ class Compiler
         return \sprintf($this->prepare(self::PARTIAL, $level), \var_export($id, \true), $indentParam);
     }
     const PARENT = '
-        if ($parent = $this->mustache->loadPartial(%s)) {
+        if ($parent = $this->mustache->loadPartial(%s, $value)) {
             $context->pushBlockContext(array(%s
             ));
             $buffer .= $parent->renderInternal($context, $indent);
@@ -358,7 +358,7 @@ class Compiler
         }
     ';
     const PARENT_NO_CONTEXT = '
-        if ($parent = $this->mustache->loadPartial(%s)) {
+        if ($parent = $this->mustache->loadPartial(%s, $value)) {
             $buffer .= $parent->renderInternal($context, $indent);
         }
     ';
