@@ -602,7 +602,8 @@ class Engine
                 throw new UnknownTemplateException($name);
             }
             try {
-                $name = $this->expressionLanguage->evaluate($name, $context);
+                $frame = $context->last('.');
+                $name = $this->expressionLanguage->evaluate($name, $frame);
                 if (!$name) {
                     return false;
                 }

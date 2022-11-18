@@ -202,7 +202,8 @@ class Context
      */
     private function findVariableInStack($id, array $stack)
     {
-        $frame = $stack[1];
+        $this->stack = $stack;
+        $frame = $this->last('.');
         try {
             return $this->expressionLanguage->evaluate($id, $frame);
         } catch(\Exception $e) {

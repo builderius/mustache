@@ -327,7 +327,7 @@ class Compiler
     }
     const PARTIAL_INDENT = ', $indent . %s';
     const PARTIAL = '
-        if ($partial = $this->mustache->loadPartial(%s, $value)) {
+        if ($partial = $this->mustache->loadPartial(%s, $context)) {
             $buffer .= $partial->renderInternal($context%s);
         }
     ';
@@ -350,7 +350,7 @@ class Compiler
         return \sprintf($this->prepare(self::PARTIAL, $level), \var_export($id, \true), $indentParam);
     }
     const PARENT = '
-        if ($parent = $this->mustache->loadPartial(%s, $value)) {
+        if ($parent = $this->mustache->loadPartial(%s, $context)) {
             $context->pushBlockContext(array(%s
             ));
             $buffer .= $parent->renderInternal($context, $indent);
@@ -358,7 +358,7 @@ class Compiler
         }
     ';
     const PARENT_NO_CONTEXT = '
-        if ($parent = $this->mustache->loadPartial(%s, $value)) {
+        if ($parent = $this->mustache->loadPartial(%s, $context)) {
             $buffer .= $parent->renderInternal($context, $indent);
         }
     ';
