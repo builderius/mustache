@@ -132,16 +132,7 @@ class Context
      */
     public function findDot($id)
     {
-        $chunks = \explode('.', $id);
-        $first = \array_shift($chunks);
-        $value = $this->findVariableInStack($first, $this->stack);
-        foreach ($chunks as $chunk) {
-            if ($value === '') {
-                return $value;
-            }
-            $value = $this->findVariableInStack($chunk, array($value));
-        }
-        return $value;
+        return $this->findVariableInStack($id, $this->stack);
     }
     /**
      * Find an 'anchored dot notation' variable in the Context stack.
@@ -160,19 +151,7 @@ class Context
      */
     public function findAnchoredDot($id)
     {
-        $chunks = \explode('.', $id);
-        $first = \array_shift($chunks);
-        if ($first !== '') {
-            throw new InvalidArgumentException(\sprintf('Unexpected id for findAnchoredDot: %s', $id));
-        }
-        $value = $this->last();
-        foreach ($chunks as $chunk) {
-            if ($value === '') {
-                return $value;
-            }
-            $value = $this->findVariableInStack($chunk, array($value));
-        }
-        return $value;
+        return $this->findVariableInStack($id, $this->stack);
     }
     /**
      * Find an argument in the block context stack.
@@ -206,7 +185,7 @@ class Context
         $frame = $this->last('.');
         try {
             return $this->expressionLanguage->evaluate($id, $frame);
-        } catch(\Exception $e) {
+        } catch(\Exception|\Error $e) {
             return '';
         }
     }
