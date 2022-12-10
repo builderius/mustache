@@ -393,6 +393,7 @@ class Compiler
     }
     const VARIABLE = '
         $value = $this->resolveValue($context->%s(%s), $context);%s
+        $value = is_array($value) ? json_encode($value) : $value;
         $buffer .= %s($value === null ? \'\' : %s);
     ';
     /**
