@@ -394,6 +394,7 @@ class Compiler
     const VARIABLE = '
         $value = $this->resolveValue($context->%s(%s), $context);%s
         $value = is_array($value) ? json_encode($value) : $value;
+        $value = is_bool($value) ? (true === $value ? "true" : "false") : $value;
         $buffer .= %s($value === null ? \'\' : %s);
     ';
     /**

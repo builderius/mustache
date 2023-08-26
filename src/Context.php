@@ -12,6 +12,7 @@ class Context
 {
     private $stack = array();
     private $blockStack = array();
+    private $globalContext = array();
 
     /**
      * @var ExpressionLanguage
@@ -37,6 +38,17 @@ class Context
     public function setExpressionLanguage(ExpressionLanguage $expressionLanguage)
     {
         $this->expressionLanguage = $expressionLanguage;
+
+        return $this;
+    }
+
+    /**
+     * @param array $globalContext
+     * @return $this
+     */
+    public function setGlobalContext(array $globalContext = null)
+    {
+        $this->globalContext = $globalContext;
 
         return $this;
     }
@@ -181,11 +193,15 @@ class Context
      */
     private function findVariableInStack($id, array $stack)
     {
+        $id = rawurldecode(htmlspecialchars_decode($id));
         $this->stack = $stack;
         $frame = $this->last('.');
         try {
+            if (is_array($this->globalContext) && is_array($frame)) {
+                $frame = array_merge($this->globalContext, $frame);
+            }
             return $this->expressionLanguage->evaluate($id, $frame);
-        } catch(\Exception|\Error $e) {
+        } catch (\Exception|\Error $e) {
             return '';
         }
     }

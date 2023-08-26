@@ -58,6 +58,8 @@ class Engine
 
     private $expressionLanguage;
 
+    private $globalContext = [];
+
     /**
      * Mustache class constructor.
      *
@@ -210,10 +212,13 @@ class Engine
      *
      * @return string Rendered template
      */
-    public function render($template, $context = array())
+    public function render($template, $context = [], $globalContext = [])
     {
-        return $this->loadTemplate($template)->render($context);
+        $this->setGlobalContext($globalContext);
+
+        return $this->loadTemplate($template)->render($context, $globalContext);
     }
+
     /**
      * Get the current Mustache escape callback.
      *
@@ -538,6 +543,22 @@ class Engine
         return $this;
     }
     /**
+     * @return mixed
+     */
+    public function getGlobalContext()
+    {
+        return $this->globalContext;
+    }
+    /**
+     * @param array $globalContext
+     * @return $this
+     */
+    public function setGlobalContext(array $globalContext = null)
+    {
+        $this->globalContext = $globalContext;
+        return $this;
+    }
+    /**
      * Get the current Lambda Cache instance.
      *
      * If 'cache_lambda_templates' is enabled, this is the default cache instance. Otherwise, it is a NoopCache.
@@ -603,6 +624,10 @@ class Engine
             }
             try {
                 $frame = $context->last('.');
+                if (is_array($this->globalContext) && is_array($frame)) {
+                    $frame = array_merge($this->globalContext, $frame);
+                }
+                $name = htmlspecialchars_decode($name);
                 $name = $this->expressionLanguage->evaluate($name, $frame);
                 if (!$name) {
                     return false;

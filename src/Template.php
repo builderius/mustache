@@ -59,9 +59,9 @@ abstract class Template
      *
      * @return string Rendered template
      */
-    public function render($context = array())
+    public function render($context = array(), $globalContext = array())
     {
-        return $this->renderInternal($this->prepareContextStack($context));
+        return $this->renderInternal($this->prepareContextStack($context, $globalContext));
     }
     /**
      * Internal rendering method implemented by Mustache Template concrete subclasses.
@@ -131,10 +131,11 @@ abstract class Template
      *
      * @return Context
      */
-    protected function prepareContextStack($context = null)
+    protected function prepareContextStack($context = null, $globalContext = null)
     {
         $stack = new Context();
         $stack->setExpressionLanguage($this->expressionLanguage);
+        $stack->setGlobalContext($globalContext);
         $helpers = $this->mustache->getHelpers();
         if (!$helpers->isEmpty()) {
             $stack->push($helpers);
